@@ -22,4 +22,12 @@ public class MemberService {
     public List<Member> getAll() {
         return mapper.selectAll();
     }
+
+    public Member getByEmail(String email) {
+        return mapper.selectByEmail(email);
+    }
+
+    public Member getByNickName(String nickName) {
+        return mapper.selectByNickName(nickName);
+    }
 }
