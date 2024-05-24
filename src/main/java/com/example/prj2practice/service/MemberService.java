@@ -69,4 +69,24 @@ public class MemberService {
 
         return result;
     }
+
+    public boolean validate(Member member) {
+        if (member.getEmail() == null || member.getEmail().isBlank()) {
+            return false;
+        }
+        if (member.getPassword() == null || member.getNickName().isBlank()) {
+            return false;
+        }
+        if (member.getNickName() == null || member.getPassword().trim().isBlank()) {
+            return false;
+        }
+
+        String emailPattern = "[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*";
+
+        if (!member.getEmail().matches(emailPattern)) {
+            return false;
+        }
+
+        return true;
+    }
 }

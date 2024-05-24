@@ -17,8 +17,12 @@ public class MemberController {
     final MemberService service;
 
     @PostMapping("/add")
-    public void add(@RequestBody Member member) {
-        service.add(member);
+    public ResponseEntity add(@RequestBody Member member) {
+        if (service.validate(member)) {
+            service.add(member);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @GetMapping("/list")
@@ -47,7 +51,7 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody Member member) {
         Map<String, Object> token = service.getToken(member);
-        
+
         if (token != null) {
             return ResponseEntity.ok(token);
         }
