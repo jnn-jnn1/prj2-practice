@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 public class Member {
-    private int id;
+    private Integer id;
     private String email;
     private String password;
     private String nickName;
