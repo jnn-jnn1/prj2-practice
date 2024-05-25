@@ -30,4 +30,15 @@ public class BoardController {
     public List<Board> list() {
         return service.getAll();
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity get(@PathVariable Integer id) {
+        Board board = service.getById(id);
+
+        if (board == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(board);
+    }
 }
