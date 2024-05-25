@@ -46,4 +46,9 @@ public class BoardController {
     public void delete(@PathVariable Integer id) {
         service.deleteById(id);
     }
+
+    @PostMapping("edit")
+    public void edit(@RequestBody Board board, Authentication authentication) {
+        service.edit(board);
+    }
 }
