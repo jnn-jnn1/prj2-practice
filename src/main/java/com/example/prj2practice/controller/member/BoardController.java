@@ -41,4 +41,9 @@ public class BoardController {
 
         return ResponseEntity.ok(board);
     }
+
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Integer id) {
+        service.deleteById(id);
+    }
 }
