@@ -21,7 +21,7 @@ CREATE TABLE board
 );
 
 SELECT *
-FROM member;
+FROM board;
 
 CREATE TABLE authority
 (
