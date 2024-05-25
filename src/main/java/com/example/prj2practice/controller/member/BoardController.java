@@ -3,6 +3,7 @@ package com.example.prj2practice.controller.member;
 import com.example.prj2practice.domain.Board;
 import com.example.prj2practice.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,12 @@ public class BoardController {
 
     @PostMapping("/write")
     @PreAuthorize("isAuthenticated()")
-    public void write(@RequestBody Board board, Authentication authentication) {
-        service.write(board, authentication);
+    public ResponseEntity write(@RequestBody Board board, Authentication authentication) {
+        if (!board.getTitle().trim().isBlank() && !board.getContent().trim().isBlank()) {
+            service.write(board, authentication);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping("list")
