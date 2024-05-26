@@ -63,8 +63,8 @@ public class MemberController {
 
     @GetMapping("{id}")
     public ResponseEntity get(@PathVariable Integer id, Authentication authentication) {
-        Member member = service.getById(id);
-        if (service.hasAccess(member, authentication)) {
+        if (service.hasAccess(id, authentication)) {
+            Member member = service.getById(id);
             return ResponseEntity.ok(member);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -73,7 +73,6 @@ public class MemberController {
     @DeleteMapping("{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity delete(@RequestBody Member member, Authentication authentication) {
-        System.out.println("3");
         if (service.hasAccess(member, authentication)) {
             service.delete(member.getId());
             return ResponseEntity.ok().build();

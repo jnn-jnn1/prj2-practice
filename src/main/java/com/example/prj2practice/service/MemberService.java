@@ -115,4 +115,11 @@ public class MemberService {
 
         return passwordEncoder.matches(member.getPassword(), dbMember.getPassword());
     }
+
+    public boolean hasAccess(Integer id, Authentication authentication) {
+        if (authentication.getName().equals(id.toString())) {
+            return true;
+        }
+        return false;
+    }
 }
