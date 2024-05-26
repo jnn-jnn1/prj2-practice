@@ -62,9 +62,12 @@ public class MemberController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity get(@PathVariable Integer id) {
+    public ResponseEntity get(@PathVariable Integer id, Authentication authentication) {
         Member member = service.getById(id);
-        return ResponseEntity.ok(member);
+        if (service.hasAccess(member, authentication)) {
+            return ResponseEntity.ok(member);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @DeleteMapping("{id}")
