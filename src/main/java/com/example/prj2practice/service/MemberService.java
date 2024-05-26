@@ -1,8 +1,10 @@
 package com.example.prj2practice.service;
 
 import com.example.prj2practice.domain.Member;
+import com.example.prj2practice.mapper.BoardMapper;
 import com.example.prj2practice.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -22,6 +24,7 @@ public class MemberService {
     final MemberMapper mapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
+    private final BoardMapper boardMapper;
 
     public void add(Member member) {
         member.setPassword(passwordEncoder.encode(member.getPassword()));
@@ -95,6 +98,21 @@ public class MemberService {
     }
 
     public void delete(Integer id) {
+        boardMapper.deleteByMemberId(id);
         mapper.deleteById(id);
+    }
+
+    public boolean hasAccess(Member member, Authentication authentication) {
+        if (!authentication.getName().equals(member.getId().toString())) {
+            return false;
+        }
+
+        Member dbMember = mapper.selectById(member.getId());
+
+        if (dbMember == null) {
+            return false;
+        }
+
+        return passwordEncoder.matches(member.getPassword(), dbMember.getPassword());
     }
 }
