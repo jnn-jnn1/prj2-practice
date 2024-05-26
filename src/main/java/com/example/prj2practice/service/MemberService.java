@@ -122,4 +122,30 @@ public class MemberService {
         }
         return false;
     }
+
+    public boolean hasAccessModify(Member member, Authentication authentication) {
+
+        if (!member.getId().toString().equals(authentication.getName())) {
+            return false;
+        }
+
+        Member db = mapper.selectById(member.getId());
+
+        if (db == null) {
+            return false;
+        }
+
+        return passwordEncoder.matches(member.getOldPassword(), db.getPassword());
+    }
+
+    public void modify(Member member) {
+
+        if (member.getPassword() != null && !member.getPassword().isBlank()) {
+            member.setPassword(passwordEncoder.encode(member.getPassword()));
+        } else {
+            Member db = mapper.selectById(member.getId());
+            member.setPassword(passwordEncoder.encode(db.getPassword()));
+        }
+        mapper.update(member);
+    }
 }

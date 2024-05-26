@@ -12,6 +12,7 @@ public class Member {
     private String password;
     private String nickName;
     private LocalDateTime inserted;
+    private String oldPassword;
 
     public String getSignupDateAndTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초");

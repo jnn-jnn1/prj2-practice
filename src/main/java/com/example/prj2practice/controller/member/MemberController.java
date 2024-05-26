@@ -85,4 +85,14 @@ public class MemberController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @PutMapping("edit")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity edit(@RequestBody Member member, Authentication authentication) {
+        if (service.hasAccessModify(member, authentication)) {
+            service.modify(member);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }
