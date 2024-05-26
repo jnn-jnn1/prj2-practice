@@ -21,7 +21,7 @@ CREATE TABLE board
 );
 
 SELECT *
-FROM board;
+FROM member;
 
 CREATE TABLE authority
 (
@@ -29,3 +29,8 @@ CREATE TABLE authority
     name      VARCHAR(20) NOT NULL,
     PRIMARY KEY (member_id, name)
 );
+
+INSERT INTO authority (member_id, name) VALUE (5, 'admin');
+
+SELECT *
+FROM authority;

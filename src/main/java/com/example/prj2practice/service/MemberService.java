@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -50,6 +51,10 @@ public class MemberService {
 
         Member db = mapper.selectByEmail(member.getEmail());
 
+        List<String> authority = mapper.getAuthorityById(db.getId());
+
+        String authorities = authority.stream().collect(Collectors.joining(" "));
+
         if (db != null) {
             if (passwordEncoder.matches(member.getPassword(), db.getPassword())) {
                 String token = "";
@@ -62,7 +67,7 @@ public class MemberService {
                         .expiresAt(now.plusSeconds(60 * 60 * 24))
                         .subject(db.getId().toString())
                         .claim("nickName", db.getNickName())
-                        .claim("scope", "")
+                        .claim("scope", authorities)
                         .build();
 
                 token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -118,10 +123,11 @@ public class MemberService {
     }
 
     public boolean hasAccess(Integer id, Authentication authentication) {
-        if (authentication.getName().equals(id.toString())) {
-            return true;
-        }
-        return false;
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("SCOPE_admin"));
+
+        boolean self = authentication.getName().equals(id.toString());
+
+        return self || isAdmin;
     }
 
     public boolean hasAccessModify(Member member, Authentication authentication) {
