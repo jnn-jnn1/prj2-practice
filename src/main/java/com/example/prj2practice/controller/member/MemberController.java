@@ -61,13 +61,19 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("{id}")
     public ResponseEntity get(@PathVariable Integer id, Authentication authentication) {
-        if (service.hasAccess(id, authentication)) {
-            Member member = service.getById(id);
+        if (!service.hasAccess(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Member member = service.getById(id);
+        if (member == null) {
+            return ResponseEntity.notFound().build();
+        } else {
             return ResponseEntity.ok(member);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @DeleteMapping("{id}")
