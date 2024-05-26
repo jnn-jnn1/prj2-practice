@@ -89,4 +89,8 @@ public class MemberService {
 
         return true;
     }
+
+    public Member getById(Integer id) {
+        return mapper.selectById(id);
+    }
 }

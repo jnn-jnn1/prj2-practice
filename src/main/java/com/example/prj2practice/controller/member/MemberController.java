@@ -58,4 +58,10 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity get(@PathVariable Integer id) {
+        Member member = service.getById(id);
+        return ResponseEntity.ok(member);
+    }
 }

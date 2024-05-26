@@ -36,4 +36,11 @@ public interface MemberMapper {
                 WHERE nick_name = #{nickName}
             """)
     Member selectByNickName(String nickName);
+
+    @Select("""
+                SELECT *
+                FROM member
+                WHERE id = {id}
+            """)
+    Member selectById(Integer id);
 }
