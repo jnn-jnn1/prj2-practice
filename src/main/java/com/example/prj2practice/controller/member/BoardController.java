@@ -3,6 +3,7 @@ package com.example.prj2practice.controller.member;
 import com.example.prj2practice.domain.Board;
 import com.example.prj2practice.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -43,12 +44,22 @@ public class BoardController {
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable Integer id) {
-        service.deleteById(id);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity delete(@PathVariable Integer id, Authentication authentication) {
+        if (service.hasAccess(id, authentication)) {
+            service.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping("edit")
-    public void edit(@RequestBody Board board, Authentication authentication) {
-        service.edit(board);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity edit(@RequestBody Board board, Authentication authentication) {
+        if (service.hasAccess(board.getId(), authentication)) {
+            service.edit(board);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
