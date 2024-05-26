@@ -64,4 +64,9 @@ public class MemberController {
         Member member = service.getById(id);
         return ResponseEntity.ok(member);
     }
+
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Integer id) {
+        service.delete(id);
+    }
 }
