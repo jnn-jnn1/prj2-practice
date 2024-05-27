@@ -21,10 +21,10 @@ public class BoardService {
         mapper.insert(board);
     }
 
-    public Map<String, Object> getAll(Integer page) {
+    public Map<String, Object> getAll(Integer page, String type, String keyword) {
         Map pageInfo = new HashMap();
         Integer offset = (page - 1) * 10;
-        Integer countAll = mapper.countAll();
+        Integer countAll = mapper.countAllWithSearch(page, type, keyword);
 
         Integer lastPageNumber = (countAll - 1) / 10 + 1;
         Integer leftPageNumber = (page - 1) / 10 * 10 + 1;
@@ -50,7 +50,7 @@ public class BoardService {
         pageInfo.put("leftPageNumber", leftPageNumber);
         pageInfo.put("rightPageNumber", rightPageNumber);
 
-        return Map.of("boardList", mapper.selectAll(offset), "pageInfo", pageInfo);
+        return Map.of("boardList", mapper.selectAll(offset, type, keyword), "pageInfo", pageInfo);
     }
 
 

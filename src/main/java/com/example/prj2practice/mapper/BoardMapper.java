@@ -15,12 +15,26 @@ public interface BoardMapper {
     int insert(Board board);
 
     @Select("""
+                <script>
                 SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted
                 FROM board b JOIN member m ON b.member_id = m.id
+                <trim prefix="WHERE" prefixOverrides="OR">
+                    <if test="type != null">
+                        <bind name="pattern" value="'%' + keyword + '%'"/>
+                        <if test="type == 'all' || type == 'text'">
+                            OR b.title LIKE #{pattern}
+                            OR b.content LIKE #{pattern}
+                        </if>
+                        <if test="type == 'all' || type == 'nickName'">
+                            OR m.nick_name LIKE #{pattern}
+                        </if>
+                    </if>
+                </trim>
                 ORDER BY id DESC
                 LIMIT #{offset} , 10
+                </script>
             """)
-    List<Board> selectAll(Integer offset);
+    List<Board> selectAll(Integer offset, String type, String keyword);
 
     @Select("""
                 SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted, b.member_id
@@ -53,4 +67,24 @@ public interface BoardMapper {
                 SELECT COUNT(*) FROM board
             """)
     Integer countAll();
+
+    @Select("""
+                       <script>
+                            SELECT COUNT(*)
+                            FROM board b JOIN member m ON b.member_id = m.id
+                            <trim prefix="WHERE" prefixOverrides="OR">
+                                <if test="type != null">
+                                    <bind name="pattern" value="'%' + keyword + '%'"/>
+                                    <if test="type == 'all' || type == 'text'">
+                                        OR b.title LIKE #{pattern}
+                                        OR b.content LIKE #{pattern}
+                                    </if>
+                                    <if test="type == 'all' || type == 'nickName'">
+                                        OR m.nick_name LIKE #{pattern}
+                                    </if>
+                                </if>
+                            </trim>
+                            </script>
+            """)
+    Integer countAllWithSearch(Integer page, String type, String keyword);
 }

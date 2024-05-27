@@ -28,8 +28,10 @@ public class BoardController {
     }
 
     @GetMapping("list")
-    public Map<String, Object> list(@RequestParam(defaultValue = "1") Integer page) {
-        return service.getAll(page);
+    public Map<String, Object> list(@RequestParam(defaultValue = "1") Integer page,
+                                    @RequestParam(required = false) String type,
+                                    @RequestParam(defaultValue = "") String keyword) {
+        return service.getAll(page, type, keyword);
     }
 
     @GetMapping("{id}")
