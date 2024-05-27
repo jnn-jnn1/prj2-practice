@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,8 +28,8 @@ public class BoardController {
     }
 
     @GetMapping("list")
-    public List<Board> list() {
-        return service.getAll();
+    public Map<String, Object> list(@RequestParam(defaultValue = "1") Integer page) {
+        return service.getAll(page);
     }
 
     @GetMapping("{id}")

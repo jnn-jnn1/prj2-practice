@@ -17,9 +17,10 @@ public interface BoardMapper {
     @Select("""
                 SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted
                 FROM board b JOIN member m ON b.member_id = m.id
-                ORDER BY id DESC 
+                ORDER BY id DESC
+                LIMIT #{offset} , 10
             """)
-    List<Board> selectAll();
+    List<Board> selectAll(Integer offset);
 
     @Select("""
                 SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted, b.member_id
@@ -47,4 +48,9 @@ public interface BoardMapper {
                 WHERE member_id = #{memberId}
             """)
     int deleteByMemberId(Integer memberId);
+
+    @Select("""
+                SELECT COUNT(*) FROM board
+            """)
+    Integer countAll();
 }
