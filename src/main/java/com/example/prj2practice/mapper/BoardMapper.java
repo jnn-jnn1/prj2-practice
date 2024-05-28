@@ -12,12 +12,13 @@ public interface BoardMapper {
                 INSERT INTO board (title, content, member_id)
                 VALUES (#{title}, #{content}, #{memberId})
             """)
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Board board);
 
     @Select("""
                 <script>
-                SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted
-                FROM board b JOIN member m ON b.member_id = m.id
+                SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted, COUNT(f.name) as numberOfImages
+                FROM board b JOIN member m ON b.member_id = m.id LEFT JOIN board_file f ON b.id = f.board_id
                 <trim prefix="WHERE" prefixOverrides="OR">
                     <if test="type != null">
                         <bind name="pattern" value="'%' + keyword + '%'"/>
@@ -30,6 +31,7 @@ public interface BoardMapper {
                         </if>
                     </if>
                 </trim>
+                GROUP BY b.id
                 ORDER BY id DESC
                 LIMIT #{offset} , 10
                 </script>
@@ -87,4 +89,16 @@ public interface BoardMapper {
                             </script>
             """)
     Integer countAllWithSearch(Integer page, String type, String keyword);
+
+    @Insert("""
+                INSERT INTO board_file (board_id, name) VALUES (#{boardId}, #{name})
+            """)
+    int insertFileName(Integer boardId, String name);
+
+    int selectImageCount(Integer boardId);
+
+    @Select("""
+            SELECT name FROM board_file WHERE board_id = #{boardId}
+            """)
+    List<String> selectFileNameByBoardId(Integer boardId);
 }

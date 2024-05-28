@@ -13,6 +13,8 @@ public class Board {
     private String writer;
     private Integer memberId;
     private LocalDateTime inserted;
+    private Integer numberOfImages;
+    private BoardFile files;
 
     public String getDateAndTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

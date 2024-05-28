@@ -51,11 +51,11 @@ public class MemberService {
 
         Member db = mapper.selectByEmail(member.getEmail());
 
-        List<String> authority = mapper.getAuthorityById(db.getId());
-
-        String authorities = authority.stream().collect(Collectors.joining(" "));
-
         if (db != null) {
+            List<String> authority = mapper.getAuthorityById(db.getId());
+
+            String authorities = authority.stream().collect(Collectors.joining(" "));
+
             if (passwordEncoder.matches(member.getPassword(), db.getPassword())) {
                 String token = "";
                 result = new HashMap<>();

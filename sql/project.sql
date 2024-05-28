@@ -38,3 +38,20 @@ FROM authority;
 INSERT INTO board (title, content, member_id)
 SELECT title, content, member_id
 FROM board;
+
+CREATE TABLE board_file
+(
+    board_id INT          NOT NULL REFERENCES board (id),
+    name     VARCHAR(500) NOT NULL,
+    PRIMARY KEY (board_id, name)
+);
+
+SELECT *
+FROM board_file;
+
+SELECT b.id, b.title, b.content, m.nick_name writer, b.inserted, COUNT(f.name) as numberOfImages
+FROM board b
+         JOIN member m ON b.member_id = m.id
+         LEFT JOIN board_file f ON b.id = f.board_id
+WHERE b.id = 901
+GROUP BY b.id;
