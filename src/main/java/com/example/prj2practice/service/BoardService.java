@@ -4,12 +4,16 @@ import com.example.prj2practice.domain.Board;
 import com.example.prj2practice.domain.BoardFile;
 import com.example.prj2practice.mapper.BoardMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -20,27 +24,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardMapper mapper;
+    private final S3Client s3Client;
+
+    @Value("${aws.s3.bucket.name}")
+    String bucketName;
+
+    @Value("${image.src.prefix}")
+    String srcPrefix;
 
     public void write(Board board, Authentication authentication, MultipartFile[] fileList) throws IOException {
 
         board.setMemberId(Integer.valueOf(authentication.getName()));
         mapper.insert(board);
 
-        // local 저장
-        String src = STR."C:/temp/prj2/\{board.getId()}";
-        File dir = new File(src);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
         // db 저장
         for (MultipartFile file : fileList) {
             String fileName = file.getOriginalFilename();
             mapper.insertFileName(board.getId(), fileName);
 
-            String filePath = src + File.separator + fileName;
-            File dest = new File(filePath);
-            file.transferTo(dest);
+            String key = STR."prj2/\{board.getId()}/\{fileName}";
+            PutObjectRequest objectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .acl(ObjectCannedACL.PUBLIC_READ)
+                    .build();
+
+            s3Client.putObject(objectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         }
 
 
@@ -88,11 +97,7 @@ public class BoardService {
 
         List<String> fileNames = mapper.selectFileNameByBoardId(id);
 
-        for (String fileName : fileNames) {
-            String src = STR."C:/temp/prj2/\{id}/\{fileName}";
-        }
-
-        List<String> srcList = fileNames.stream().map(name -> STR."C:/temp/prj2/\{id}/\{name}").toList();
+        List<String> srcList = fileNames.stream().map(name -> STR."\{srcPrefix}\{id}/\{name}").toList();
 
         BoardFile boardFile = new BoardFile(fileNames, srcList);
         board.setFiles(boardFile);
