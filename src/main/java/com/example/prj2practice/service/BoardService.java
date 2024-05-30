@@ -98,10 +98,10 @@ public class BoardService {
 
         List<String> fileNames = mapper.selectFileNameByBoardId(id);
 
-        List<String> srcList = fileNames.stream().map(name -> STR."\{srcPrefix}\{id}/\{name}").toList();
+        List<BoardFile> files = fileNames.stream().map(
+                name -> new BoardFile(name, STR."\{srcPrefix}\{id}/\{name}")).toList();
 
-        BoardFile boardFile = new BoardFile(fileNames, srcList);
-        board.setFiles(boardFile);
+        board.setFiles(files);
 
         return board;
     }
@@ -124,7 +124,20 @@ public class BoardService {
         mapper.deleteById(id);
     }
 
-    public void edit(Board board) {
+    public void edit(Board board, List<String> removeFileList) {
+        if (removeFileList != null && removeFileList.size() > 0) {
+            for (String fileName : removeFileList) {
+                String key = STR."prj2/\{board.getId()}/\{fileName}";
+                DeleteObjectRequest objectRequest = DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build();
+
+                s3Client.deleteObject(objectRequest);
+
+                mapper.deleteFileByFileName(fileName, board.getId());
+            }
+        }
         mapper.update(board);
     }
 

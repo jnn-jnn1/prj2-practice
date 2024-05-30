@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,9 +62,9 @@ public class BoardController {
 
     @PostMapping("edit")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity edit(@RequestBody Board board, Authentication authentication) {
+    public ResponseEntity edit(Board board, @RequestParam(value = "removeFileList[]", required = false) List<String> removeFileList, Authentication authentication) {
         if (service.hasAccess(board.getId(), authentication)) {
-            service.edit(board);
+            service.edit(board, removeFileList);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

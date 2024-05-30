@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Data
 public class Board {
@@ -14,7 +15,7 @@ public class Board {
     private Integer memberId;
     private LocalDateTime inserted;
     private Integer numberOfImages;
-    private BoardFile files;
+    private List<BoardFile> files;
 
     public String getDateAndTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
