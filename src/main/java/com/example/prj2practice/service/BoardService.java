@@ -124,7 +124,7 @@ public class BoardService {
         mapper.deleteById(id);
     }
 
-    public void edit(Board board, List<String> removeFileList) {
+    public void edit(Board board, List<String> removeFileList, MultipartFile[] addFileList) {
         if (removeFileList != null && removeFileList.size() > 0) {
             for (String fileName : removeFileList) {
                 String key = STR."prj2/\{board.getId()}/\{fileName}";
@@ -138,6 +138,7 @@ public class BoardService {
                 mapper.deleteFileByFileName(fileName, board.getId());
             }
         }
+
         mapper.update(board);
     }
 

@@ -62,9 +62,13 @@ public class BoardController {
 
     @PostMapping("edit")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity edit(Board board, @RequestParam(value = "removeFileList[]", required = false) List<String> removeFileList, Authentication authentication) {
+    public ResponseEntity edit(Board board,
+                               @RequestParam(value = "removeFileList[]", required = false) List<String> removeFileList,
+                               Authentication authentication,
+                               @RequestParam(value = "addFileList[]", required = false) MultipartFile[] addFileList
+    ) {
         if (service.hasAccess(board.getId(), authentication)) {
-            service.edit(board, removeFileList);
+            service.edit(board, removeFileList, addFileList);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
