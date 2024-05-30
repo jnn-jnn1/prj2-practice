@@ -66,7 +66,7 @@ public class BoardController {
                                @RequestParam(value = "removeFileList[]", required = false) List<String> removeFileList,
                                Authentication authentication,
                                @RequestParam(value = "addFileList[]", required = false) MultipartFile[] addFileList
-    ) {
+    ) throws IOException {
         if (service.hasAccess(board.getId(), authentication)) {
             service.edit(board, removeFileList, addFileList);
             return ResponseEntity.ok().build();

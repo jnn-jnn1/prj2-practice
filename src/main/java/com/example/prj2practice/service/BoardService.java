@@ -124,7 +124,7 @@ public class BoardService {
         mapper.deleteById(id);
     }
 
-    public void edit(Board board, List<String> removeFileList, MultipartFile[] addFileList) {
+    public void edit(Board board, List<String> removeFileList, MultipartFile[] addFileList) throws IOException {
         if (removeFileList != null && removeFileList.size() > 0) {
             for (String fileName : removeFileList) {
                 String key = STR."prj2/\{board.getId()}/\{fileName}";
@@ -136,6 +136,26 @@ public class BoardService {
                 s3Client.deleteObject(objectRequest);
 
                 mapper.deleteFileByFileName(fileName, board.getId());
+            }
+        }
+
+        if (addFileList != null && addFileList.length > 0) {
+            List<String> fileNameList = mapper.selectFileNameByBoardId(board.getId());
+            for (MultipartFile file : addFileList) {
+                String name = file.getOriginalFilename();
+                if (!fileNameList.contains(name)) {
+                    // db에 추가
+                    mapper.insertFileName(board.getId(), name);
+                }
+                // s3에 추가
+                String key = STR."prj2/\{board.getId()}/\{name}";
+                PutObjectRequest objectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .acl(ObjectCannedACL.PUBLIC_READ)
+                        .build();
+
+                s3Client.putObject(objectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             }
         }
 
