@@ -62,4 +62,5 @@ public interface MemberMapper {
                 WHERE member_id = #{memberId}
             """)
     List<String> getAuthorityById(Integer memberId);
+
 }

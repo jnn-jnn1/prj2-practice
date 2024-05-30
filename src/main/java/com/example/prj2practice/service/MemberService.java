@@ -1,5 +1,6 @@
 package com.example.prj2practice.service;
 
+import com.example.prj2practice.domain.Board;
 import com.example.prj2practice.domain.Member;
 import com.example.prj2practice.mapper.BoardMapper;
 import com.example.prj2practice.mapper.MemberMapper;
@@ -27,6 +28,7 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
     private final BoardMapper boardMapper;
+    private final BoardService boardService;
 
     public void add(Member member) {
         member.setPassword(passwordEncoder.encode(member.getPassword()));
@@ -104,6 +106,14 @@ public class MemberService {
     }
 
     public void delete(Integer id) {
+
+        // 회원이 쓴 게시물 조회
+        List<Board> boardList = boardMapper.selectByMemberId(id);
+
+        boardList.forEach((board -> {
+            boardService.deleteById(board.getId());
+        }));
+
         boardMapper.deleteByMemberId(id);
         mapper.deleteById(id);
     }

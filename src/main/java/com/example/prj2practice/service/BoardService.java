@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -106,6 +107,20 @@ public class BoardService {
     }
 
     public void deleteById(Integer id) {
+        List<String> fileNames = mapper.selectFileNameByBoardId(id);
+
+        for (String fileName : fileNames) {
+            String key = STR."prj2/\{id}/\{fileName}";
+            DeleteObjectRequest objectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key).build();
+
+            s3Client.deleteObject(objectRequest);
+        }
+
+        //board_file
+        mapper.deleteFileById(id);
+        //board
         mapper.deleteById(id);
     }
 
