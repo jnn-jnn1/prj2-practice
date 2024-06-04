@@ -4,7 +4,11 @@ import com.example.prj2practice.domain.Board;
 import com.example.prj2practice.domain.Member;
 import com.example.prj2practice.mapper.BoardMapper;
 import com.example.prj2practice.mapper.MemberMapper;
+import com.nimbusds.jose.shaded.gson.JsonElement;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -14,6 +18,9 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +32,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MemberService {
     final MemberMapper mapper;
+
+    @Value("${kakao.login.client_id}")
+    String clientId;
+    @Value("${kakao.login.redirect_uri}")
+    String redirectUri;
+
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
     private final BoardMapper boardMapper;
@@ -177,5 +190,84 @@ public class MemberService {
         token = jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
 
         return Map.of("token", token);
+    }
+
+    public String getKaKaoAcessToken(String code) throws IOException {
+        String accessToken = "";
+        String refreshToken = "";
+        String requestURL = "https://kauth.kakao.com/oauth/token";
+
+        URL url = new URL(requestURL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+        String sb = STR."grant_type=authorization_code&client_id=\{clientId}&redirect_uri=\{redirectUri}&code=\{code}";
+        bufferedWriter.write(sb);
+        bufferedWriter.flush();
+
+        int responseCode = connection.getResponseCode();
+
+        // 요청을 통해 얻은 데이터를 InputStreamReader을 통해 읽어 오기
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String line = "";
+        StringBuilder result = new StringBuilder();
+
+        while ((line = bufferedReader.readLine()) != null) {
+            result.append(line);
+        }
+
+        JsonElement element = JsonParser.parseString(result.toString());
+
+        accessToken = element.getAsJsonObject().get("access_token").getAsString();
+        refreshToken = element.getAsJsonObject().get("refresh_token").getAsString();
+
+        bufferedReader.close();
+        bufferedWriter.close();
+
+        return accessToken;
+    }
+
+    public Map<String, String> getUserInfo(String accessToken) throws IOException {
+        HashMap<String, String> userInfo = new HashMap<>();
+        String reqUrl = "https://kapi.kakao.com/v2/user/me";
+        URL url = new URL(reqUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+        conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        int responseCode = conn.getResponseCode();
+
+        BufferedReader br;
+        if (responseCode >= 200 && responseCode <= 300) {
+            br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } else {
+            br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        }
+
+        String line = "";
+        StringBuilder responseSb = new StringBuilder();
+        while ((line = br.readLine()) != null) {
+            responseSb.append(line);
+        }
+        String result = responseSb.toString();
+
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(result);
+
+        JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
+        JsonObject kakaoAccount = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
+
+        String nickname = properties.getAsJsonObject().get("nickname").getAsString();
+        String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+
+        userInfo.put("nickname", nickname);
+        userInfo.put("email", email);
+
+        br.close();
+
+        return userInfo;
     }
 }
